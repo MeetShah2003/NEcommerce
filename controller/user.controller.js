@@ -1,6 +1,10 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const { userModel } = require("../models/user.schema");
+require("dotenv").config();
+
+const OTP = Math.floor(Math.random() * 10000);
 
 const signupPage = (req, res) => {
   res.render("signup");
@@ -9,8 +13,10 @@ const signupPage = (req, res) => {
 const signUp = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
-    const user = await userModel.findOne({ email });
+    const user = await userModel.findOne({ email: email });
     if (user) {
+      return res.status(400).send({ message: "user already exist" });
+    } else {
       bcrypt.hash(password, 5, async (err, hash) => {
         if (err) {
           console.log(err.message);
@@ -22,11 +28,15 @@ const signUp = async (req, res) => {
             role,
           });
           console.log(user);
-          return res.status(200).redirect("/login");
+          const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+          return res
+            .status(200)
+            .cookie("userId", user._id, "token", token._id, "role", user.role, {
+              expiresIn: "2s",
+            })
+            .redirect("/login");
         }
       });
-    } else {
-      return res.status(400).send({ message: "user already exist" });
     }
   } catch (error) {
     return res.send({ message: error.message });
@@ -40,15 +50,22 @@ const loginPage = (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const data = await userModel.findOne({ email });
+    const data = await userModel.findOne({ email: email });
     if (data) {
       bcrypt.compare(password, data.password, (err, result) => {
         if (err) {
-          return res.status(200).send({ message: err.message });
-        } else {
-          const token = jwt.sign({ id: data._id }, "private-key");
+          return res.status(400).send({ message: err.message });
+        }
+        if (result) {
+          const token = jwt.sign({ id: data._id }, process.env.JWT_SECRET);
           console.log(token);
-          return res.status(200).cookie("token", token).redirect("/user/home");
+          console.log(req.cookies);
+          return res
+            .status(200)
+            .cookie("userId", data.id, "token", token.id)
+            .redirect("/home");
+        } else {
+          return res.status(200).send({ message: "invalid password" });
         }
       });
     } else {
@@ -59,8 +76,52 @@ const login = async (req, res) => {
   }
 };
 
+const useremailPage = (req, res) => {
+  return res.render("sendEmail");
+};
+
+const transport = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+const userEmail = (req, res) => {
+  const { to, subject, text } = req.body;
+  const email = {
+    to,
+    subject,
+    text,
+    html: `your ONE TIME VERIFICATION(OTP) is ${OTP}`,
+  };
+  transport.sendMail(email, (err, info) => {
+    if (err) {
+      console.log(err.message);
+    } else {
+      console.log(info);
+    }
+    console.log(email);
+  });
+  return res.status(200).redirect("/verifyotp");
+};
+
 const homePage = (req, res) => {
   return res.render("home");
 };
 
-module.exports = { signupPage, signUp, loginPage, login, homePage };
+const otpPage=(req,res)=>{
+  return res.render("otp");
+};
+
+module.exports = {
+  signupPage,
+  signUp,
+  loginPage,
+  login,
+  useremailPage,
+  userEmail,
+  homePage,
+  otpPage
+};

@@ -5,6 +5,7 @@ const passport = require("passport");
 const { connection } = require("./config/db");
 const { userRoute } = require("./routes/user.routes");
 const { googleAuth } = require("./helper/google.auth");
+const { productRoute } = require("./routes/product.routes");
 const app = express();
 
 app.use(express.json());
@@ -23,6 +24,7 @@ app.set("views", __dirname + "/views");
 app.use(express.static(__dirname + "/public"));
 
 app.use(userRoute);
+app.use("/product",productRoute);
 
 app.listen(8090, () => {
   console.log("Server is running on port 8090");
