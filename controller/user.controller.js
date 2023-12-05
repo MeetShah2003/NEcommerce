@@ -28,13 +28,16 @@ const signUp = async (req, res) => {
             role,
           });
           console.log(user);
-          const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+          const token = jwt.sign(
+            { id: user._id, role: user.role },
+            process.env.JWT_SECRET
+          );
           return res
             .status(200)
-            .cookie("userId", user._id, "token", token._id, "role", user.role, {
-              expiresIn: "2s",
-            })
-            .redirect("/login");
+            // .cookie("userId", user._id)
+            .cookie("token", token)
+            // .cookie("role", user.role)
+            .redirect("/user/login");
         }
       });
     }
@@ -57,13 +60,17 @@ const login = async (req, res) => {
           return res.status(400).send({ message: err.message });
         }
         if (result) {
-          const token = jwt.sign({ id: data._id }, process.env.JWT_SECRET);
+          const token = jwt.sign(
+            { id: data._id, role: data.role },
+            process.env.JWT_SECRET
+          );
           console.log(token);
           console.log(req.cookies);
           return res
             .status(200)
-            .cookie("userId", data.id, "token", token.id)
-            .redirect("/home");
+            // .cookie("userId", data.id)
+            .cookie("token", token)
+            .redirect("/product/allpro");
         } else {
           return res.status(200).send({ message: "invalid password" });
         }
@@ -111,7 +118,7 @@ const homePage = (req, res) => {
   return res.render("home");
 };
 
-const otpPage=(req,res)=>{
+const otpPage = (req, res) => {
   return res.render("otp");
 };
 
@@ -123,5 +130,5 @@ module.exports = {
   useremailPage,
   userEmail,
   homePage,
-  otpPage
+  otpPage,
 };

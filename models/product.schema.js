@@ -2,12 +2,12 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
   title: String,
-  price: String,
+  price: Number,
   description: String,
   category: String,
-  img: String,
-  stock:String,
-  rating: [{ userId: String, value: String }],
+  image: String,
+  stock: Number,
+  // rating: [{ userId: String, value: Number }],
   size: String,
   color: String,
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "EcomUser" },

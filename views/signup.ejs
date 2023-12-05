@@ -4,17 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign up FORM</title>
+    <link rel="stylesheet" href="../index.css">
   </head>
   <body>
-    <form action="/signup" method="post">
-      <input type="text" name="username" placeholder="Enter UserName" />
-      <input type="email" name="email" placeholder="Enter EmailID" />
-      <input type="password" name="password" placeholder="Enter Password" />
-      <select name="role" id="">
-        <option value="ADMIN">ADMIN</option>
-        <option value="USER">USER</option>
-      </select>
-      <input type="submit" value="Signup" />
-    </form>
+    <%- include("nav") %>
+
+    
+    <section class="signupForm">
+      <form action="/user/signup" method="post" id="form">
+          <input type="text" name="username" id="username" placeholder="Enter UserName"><br><br>
+          <input type="password" name="password" id="password" placeholder="Enter Password"><br><br>
+          <input type="email" name="email" id="email" placeholder="Enter EmailID"><br><br>
+          <select name="role" id="role">
+              <option value="user" class="opt">user</option>
+              <option value="admin" class="opt">admin</option>
+          </select><br><br>
+          <input type="submit" value="Signup" id="signup">
+      </form>
+      </section>
   </body>
 </html>
