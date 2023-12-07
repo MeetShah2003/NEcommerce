@@ -1,10 +1,11 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const otpGenerator=require("otp-generator");
 const { userModel } = require("../models/user.schema");
 require("dotenv").config();
 
-const OTP = Math.floor(Math.random() * 10000);
+let OTP;
 
 const signupPage = (req, res) => {
   res.render("signup");
@@ -64,13 +65,11 @@ const login = async (req, res) => {
             { id: data._id, role: data.role },
             process.env.JWT_SECRET
           );
-          console.log(token);
-          console.log(req.cookies);
           return res
             .status(200)
             // .cookie("userId", data.id)
             .cookie("token", token)
-            .redirect("/product/allpro");
+            .redirect("/product/homeProduct");
         } else {
           return res.status(200).send({ message: "invalid password" });
         }
@@ -83,10 +82,6 @@ const login = async (req, res) => {
   }
 };
 
-const useremailPage = (req, res) => {
-  return res.render("sendEmail");
-};
-
 const transport = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -96,12 +91,12 @@ const transport = nodemailer.createTransport({
 });
 
 const userEmail = (req, res) => {
-  const { to, subject, text } = req.body;
+  const { to } = req.body;
+  OTP=otpGenerator.generate(6,{upperCaseAlphabets:false,lowerCaseAlphabets:false,specialChars:false});
   const email = {
     to,
-    subject,
-    text,
-    html: `your ONE TIME VERIFICATION(OTP) is ${OTP}`,
+    subject:"ONE TIME VERIFICATION(OTP)",
+    html: `<a href="http://localhost:8090/user/useremail/${OTP}">Verify your OTP</a>your ONE TIME VERIFICATION(OTP) is ${OTP}`,
   };
   transport.sendMail(email, (err, info) => {
     if (err) {
@@ -114,12 +109,14 @@ const userEmail = (req, res) => {
   return res.status(200).redirect("/verifyotp");
 };
 
-const homePage = (req, res) => {
-  return res.render("home");
-};
-
-const otpPage = (req, res) => {
-  return res.render("otp");
+const verifyOtp=(req,res)=>{
+  let {token}=req.params;
+  if(token==OTP){
+    return res.status(200).redirect("/user/login");
+  }
+  else{
+    return res.status(400).send({message:"invalid otp"});
+  }
 };
 
 module.exports = {
@@ -127,8 +124,6 @@ module.exports = {
   signUp,
   loginPage,
   login,
-  useremailPage,
   userEmail,
-  homePage,
-  otpPage,
+  verifyOtp
 };

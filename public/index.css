@@ -19,6 +19,22 @@ li {
   list-style: none;
 }
 
+img{
+  width: 200px;
+  height: 250px;
+}
+
+.content-box{
+  display: flex;
+}
+
+.left-box{
+  width: 15%;
+}
+.right-box{
+  width: 85%;
+}
+
 a {
   text-decoration: none;
 }
@@ -45,6 +61,7 @@ a {
 header {
   background-color: black;
   padding: 15px;
+  margin-bottom: 20px;
 }
 
 .signupForm,
@@ -103,6 +120,29 @@ header {
   color: gold;
   transition: all ease-in-out 0.5s;
 }
+
+.products #product{
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 15px;
+}
+.products #product div {
+  box-shadow: rgb(35, 34, 44, 0.24) 0px 3px 8px;
+  border-radius: 15px;
+  width: 400px;
+}
+
+.products #product div img{
+  border-radius: 10px;
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+.products #product div #title{
+  text-align: center;
+} 
+
 
 /* #parent-box {
   display: grid;

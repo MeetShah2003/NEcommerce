@@ -20,7 +20,6 @@ const isAdmin = (req, res, next) => {
   let { token } = req.cookies;
   if (token) {
     let decode = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decode);
     if (decode.role == "admin") {
       req.user=decode;
       next();
